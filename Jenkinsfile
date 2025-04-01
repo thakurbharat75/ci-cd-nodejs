@@ -8,14 +8,19 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/thakurbharat75/ci-cd-nodejs.git
-'
+                git credentialsId: 'github-credentials-id', url: 'https://github.com/thakurbharat75/ci-cd-nodejs.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh '''
+                    if [ -d node_modules ]; then
+                        echo "Using cached node_modules"
+                    else
+                        npm install
+                    fi
+                '''
             }
         }
 
@@ -33,26 +38,30 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
-                    sh 'docker push $DOCKER_IMAGE'
+                script {
+                    docker.withRegistry('', 'docker-hub-credentials') {
+                        sh 'docker push $DOCKER_IMAGE'
+                    }
                 }
             }
         }
 
         stage('Deploy Application') {
             steps {
-                sh 'docker run -d -p 80:3000 $DOCKER_IMAGE'
+                script {
+                    sh 'docker stop node-app || true && docker rm node-app || true'
+                    sh 'docker run -d --name node-app -p 80:3000 $DOCKER_IMAGE'
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Deployment successful!'
+            echo '✅ Deployment successful!'
         }
         failure {
-            echo 'Build failed!'
+            echo '❌ Build failed! Check logs for details.'
         }
     }
 }
-
