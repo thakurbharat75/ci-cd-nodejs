@@ -2,7 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'your-dockerhub-username/node-app'
+        DOCKER_IMAGE = 'thakurbharat75/node-app'
+        DOCKER_USERNAME = credentials('thakurbharat75')  // Jenkins Secret for Docker Username
+        DOCKER_PASSWORD = credentials('Btchemistry@333')  // Jenkins Secret for Docker Password
     }
 
     stages {
@@ -53,10 +55,10 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('', 'docker-hub-credentials') {
-                        dir('app') {
-                            sh 'sudo docker push $DOCKER_IMAGE'
-                        }
+                    // Log in to Docker Hub
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    dir('app') {
+                        sh 'docker push $DOCKER_IMAGE'
                     }
                 }
             }
@@ -66,8 +68,11 @@ pipeline {
             steps {
                 script {
                     dir('app') {
-                        sh 'sudo docker stop node-app || true && docker rm node-app || true'
-                        sh 'sudo docker run -d --name node-app -p 80:3000 $DOCKER_IMAGE'
+                        sh '''
+                            docker stop node-app || true
+                            docker rm node-app || true
+                            docker run -d --name node-app -p 80:3000 $DOCKER_IMAGE
+                        '''
                     }
                 }
             }
