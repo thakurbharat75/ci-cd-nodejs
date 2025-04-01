@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     dir('app') {
-                        sh 'sudo docker build -t $DOCKER_IMAGE .'
+                        sh 'docker build -t $DOCKER_IMAGE .'
                     }
                 }
             }
