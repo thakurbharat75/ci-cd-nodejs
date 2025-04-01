@@ -1,58 +1,86 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'your-dockerhub-username/node-app'
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/thakurbharat75/ci-cd-nodejs.git
-'
+                git branch: 'main', url: 'https://github.com/thakurbharat75/ci-cd-nodejs.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                script {
+                    // Navigate to the 'app' directory
+                    dir('app') {
+                        sh '''
+                            if [ -f package.json ]; then
+                                npm install
+                            else
+                                echo "package.json not found!"
+                                exit 1
+                            fi
+                        '''
+                    }
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'npm test || echo "No tests found, continuing..."'
+                script {
+                    dir('app') {
+                        sh 'npm test || echo "No tests found, continuing..."'
+                    }
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
+                script {
+                    dir('app') {
+                        // Make sure to tag the Docker image correctly
+                        sh 'docker build -t thakurbharat75/node-app .'
+                    }
+                }
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
-                    sh 'docker push $DOCKER_IMAGE'
+                script {
+                    // Log in to Docker Hub with your credentials directly
+                    sh 'echo "Btchemistry@333" | docker login -u "thakurbharat75" --password-stdin'
+                    dir('app') {
+                        // Ensure image is tagged and then push to Docker Hub
+                        sh 'docker push thakurbharat75/node-app'
+                    }
                 }
             }
         }
 
         stage('Deploy Application') {
             steps {
-                sh 'docker run -d -p 80:3000 $DOCKER_IMAGE'
+                script {
+                    dir('app') {
+                        sh '''
+                            docker stop node-app || true
+                            docker rm node-app || true
+                            docker run -d --name node-app -p 80:3000 thakurbharat75/node-app
+                        '''
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Deployment successful!'
+            echo '✅ Deployment successful!'
         }
         failure {
-            echo 'Build failed!'
+            echo '❌ Build failed! Check logs for details.'
         }
     }
 }
-
