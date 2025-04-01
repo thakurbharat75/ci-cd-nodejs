@@ -40,7 +40,7 @@ pipeline {
             steps {
                 script {
                     dir('app') {
-                        sh 'docker build -t your-dockerhub-username/node-app .'
+                        sh 'docker build -t your-thakurbharat75/node-app .'
                     }
                 }
             }
@@ -49,7 +49,7 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    // Log in to Docker Hub
+                    // Log in to Docker Hub with your credentials directly
                     sh 'echo "Btchemistry@333" | docker login -u "thakurbharat75" --password-stdin'
                     dir('app') {
                         sh 'docker push thakurbharat75/node-app'
@@ -65,7 +65,7 @@ pipeline {
                         sh '''
                             docker stop node-app || true
                             docker rm node-app || true
-                            docker run -d --name node-app -p 80:3000 your-dockerhub-username/node-app
+                            docker run -d --name node-app -p 80:3000 thakurbharat75/node-app
                         '''
                     }
                 }
@@ -77,4 +77,8 @@ pipeline {
         success {
             echo '✅ Deployment successful!'
         }
-        failure
+        failure {
+            echo '❌ Build failed! Check logs for details.'
+        }
+    }
+}
