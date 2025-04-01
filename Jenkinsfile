@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     dir('app') {
-                        sh 'docker build -t $DOCKER_IMAGE .'
+                        sh 'sudo docker build -t $DOCKER_IMAGE .'
                     }
                 }
             }
@@ -55,7 +55,7 @@ pipeline {
                 script {
                     docker.withRegistry('', 'docker-hub-credentials') {
                         dir('app') {
-                            sh 'docker push $DOCKER_IMAGE'
+                            sh 'sudo docker push $DOCKER_IMAGE'
                         }
                     }
                 }
@@ -66,8 +66,8 @@ pipeline {
             steps {
                 script {
                     dir('app') {
-                        sh 'docker stop node-app || true && docker rm node-app || true'
-                        sh 'docker run -d --name node-app -p 80:3000 $DOCKER_IMAGE'
+                        sh 'sudo docker stop node-app || true && docker rm node-app || true'
+                        sh 'sudo docker run -d --name node-app -p 80:3000 $DOCKER_IMAGE'
                     }
                 }
             }
