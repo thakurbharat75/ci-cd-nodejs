@@ -40,7 +40,8 @@ pipeline {
             steps {
                 script {
                     dir('app') {
-                        sh 'docker build -t your-thakurbharat75/node-app .'
+                        // Make sure to tag the Docker image correctly
+                        sh 'docker build -t thakurbharat75/node-app .'
                     }
                 }
             }
@@ -52,6 +53,7 @@ pipeline {
                     // Log in to Docker Hub with your credentials directly
                     sh 'echo "Btchemistry@333" | docker login -u "thakurbharat75" --password-stdin'
                     dir('app') {
+                        // Ensure image is tagged and then push to Docker Hub
                         sh 'docker push thakurbharat75/node-app'
                     }
                 }
