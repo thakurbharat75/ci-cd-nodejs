@@ -1,12 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'thakurbharat75/node-app'
-        DOCKER_USERNAME = credentials('thakurbharat75')  // Jenkins Secret for Docker Username
-        DOCKER_PASSWORD = credentials('Btchemistry@333')  // Jenkins Secret for Docker Password
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
@@ -46,7 +40,7 @@ pipeline {
             steps {
                 script {
                     dir('app') {
-                        sh 'docker build -t $DOCKER_IMAGE .'
+                        sh 'docker build -t your-dockerhub-username/node-app .'
                     }
                 }
             }
@@ -56,9 +50,9 @@ pipeline {
             steps {
                 script {
                     // Log in to Docker Hub
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    sh 'echo "Btchemistry@333" | docker login -u "thakurbharat75" --password-stdin'
                     dir('app') {
-                        sh 'docker push $DOCKER_IMAGE'
+                        sh 'docker push thakurbharat75/node-app'
                     }
                 }
             }
@@ -71,7 +65,7 @@ pipeline {
                         sh '''
                             docker stop node-app || true
                             docker rm node-app || true
-                            docker run -d --name node-app -p 80:3000 $DOCKER_IMAGE
+                            docker run -d --name node-app -p 80:3000 your-dockerhub-username/node-app
                         '''
                     }
                 }
@@ -83,8 +77,4 @@ pipeline {
         success {
             echo '✅ Deployment successful!'
         }
-        failure {
-            echo '❌ Build failed! Check logs for details.'
-        }
-    }
-}
+        failure
