@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script {
                     // Log in to Docker Hub with your credentials directly
-                    sh 'echo "Btchemistry@333" | docker login -u "thakurbharat75" --password-stdin'
+                    sh 'echo "ccccccccccccc" | docker login -u "thakurbharat75" --password-stdin'
                     dir('app') {
                         // Ensure image is tagged and then push to Docker Hub
                         sh 'docker push thakurbharat75/node-app'
